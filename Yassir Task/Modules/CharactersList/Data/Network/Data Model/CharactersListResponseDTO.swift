@@ -7,12 +7,12 @@
 
 import Foundation
 
-struct CharactersResponseDTO: Codable {
+struct CharactersListResponseDTO: Codable {
     let info: Info
     let results: [Character]
 }
 
-extension CharactersResponseDTO {
+extension CharactersListResponseDTO {
     // MARK: - Result
     struct Character: Codable {
         let id: Int

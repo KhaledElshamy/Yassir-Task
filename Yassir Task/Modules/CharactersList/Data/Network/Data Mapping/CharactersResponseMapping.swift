@@ -7,29 +7,27 @@
 
 import Foundation
 
-// MARK: - CharactersResponseDTO to CharactersResponse Mapping
+// MARK: - CharactersListResponseDTO to CharactersListResponse Mapping
 
-extension CharactersResponseDTO {
+extension CharactersListResponseDTO {
     
-    /// Maps CharactersResponseDTO to domain entity CharactersResponse
-    func toDomain() -> [CharactersResponse] {
-        return results.compactMap { character in
+    /// Maps CharactersListResponseDTO to domain entity CharactersListResponse
+    func toDomain() -> CharactersListResponse {
+        let characters = results.compactMap { character in
             character.toDomain()
         }
-    }
-    
-    /// Maps CharactersResponseDTO to domain entity with info
-    func toDomainWithInfo() -> (characters: [CharactersResponse], info: CharactersInfo) {
-        let characters = toDomain()
         let info = self.info.toDomain()
-        return (characters, info)
+        
+        return CharactersListResponse(
+            info: info, results: characters
+        )
     }
 }
 
-extension CharactersResponseDTO.Character {
+extension CharactersListResponseDTO.Character {
     
-    /// Maps Character DTO to domain entity CharactersResponse
-    func toDomain() -> CharactersResponse? {
+    /// Maps Character DTO to domain entity CharacterResponse
+    func toDomain() -> CharacterResponse? {
         // Validate required fields
         guard !name.isEmpty, !species.isEmpty else {
             return nil
@@ -44,16 +42,18 @@ extension CharactersResponseDTO.Character {
             imageURL = URL(string: "https://via.placeholder.com/150")!
         }
         
-        return .init(id: id,
-                     name: name,
-                     imageUrl: imageURL,
-                     species: species,
-                     status: mapStatus(status), gender: gender)
+        return CharacterResponse(
+            id: id,
+            name: name,
+            imageUrl: imageURL,
+            species: species,
+            status: mapStatus(status),
+            gender: gender
+        )
     }
     
-    
     /// Maps string status to enum status
-    private func mapStatus(_ statusString: String) -> CharactersResponse.Status {
+    private func mapStatus(_ statusString: String) -> CharacterResponse.Status {
         switch statusString.lowercased() {
         case "alive":
             return .alive
@@ -66,11 +66,34 @@ extension CharactersResponseDTO.Character {
 }
 
 // MARK: - Info DTO to Domain Mapping
+
 extension Info {
-    /// Maps Info DTO to domain entity (if needed)
+    /// Maps Info DTO to domain entity CharactersInfo
     func toDomain() -> CharactersInfo {
-        return .init(count: count ?? 0,
-                     pages: pages ?? 0,
-                     next: next, prev: prev)
+        return CharactersInfo(
+            count: count ?? 0,
+            pages: pages ?? 0,
+            next: next,
+            prev: prev
+        )
+    }
+}
+
+// MARK: - Mapping Errors
+
+enum CharactersMappingError: Error, LocalizedError {
+    case invalidImageURL(String)
+    case missingRequiredField(String)
+    case invalidStatus(String)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidImageURL(let url):
+            return "Invalid image URL: \(url)"
+        case .missingRequiredField(let field):
+            return "Missing required field: \(field)"
+        case .invalidStatus(let status):
+            return "Invalid status: \(status)"
+        }
     }
 }

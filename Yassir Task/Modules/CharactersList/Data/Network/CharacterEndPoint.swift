@@ -10,7 +10,7 @@ import Foundation
 
 struct CharactersAPIEndPoints {
     
-    static func getHomeList(with charactersRequestDTO: CharactersRequestDTO = CharactersRequestDTO()) -> Endpoint<CharactersResponseDTO> {
+    static func getCharactersList(with charactersRequestDTO: CharactersRequestDTO = CharactersRequestDTO()) -> Endpoint<CharactersListResponseDTO> {
 
         return Endpoint(
             path: "api/character",

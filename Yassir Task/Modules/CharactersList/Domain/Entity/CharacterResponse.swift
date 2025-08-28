@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CharactersResponse {
+struct CharacterResponse {
   enum Status {
     case alive
     case dead
