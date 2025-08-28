@@ -10,13 +10,34 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    private var appFlowCoordinator: AppFlowCoordinator?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        
+        setupWindow(with: windowScene)
+        setupAppFlowCoordinator()
+    }
+    
+    private func setupWindow(with windowScene: UIWindowScene) {
+        window = UIWindow(windowScene: windowScene)
+    }
+    
+    private func setupAppFlowCoordinator() {
+        guard let window = window else { return }
+        
+        let diContainer = AppDIContainer()
+        let dependencies = AppFlowCoordinator.Dependencies(
+            apiDataTransferService: diContainer.apiDataTransferService
+        )
+        
+        appFlowCoordinator = AppFlowCoordinator(
+            window: window,
+            dependencies: dependencies
+        )
+        
+        appFlowCoordinator?.delegate = self
+        appFlowCoordinator?.start()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -49,7 +70,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Save changes in the application's managed object context when the application transitions to the background.
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
+}
 
+// MARK: - AppFlowCoordinatorDelegate
 
+extension SceneDelegate: AppFlowCoordinatorDelegate {
+    func appFlowCoordinatorDidFinish(_ coordinator: AppFlowCoordinator) {
+        // Handle app flow completion if needed
+        appFlowCoordinator = nil
+    }
 }
 
