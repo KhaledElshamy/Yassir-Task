@@ -338,7 +338,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Rick and Morty API**: [https://rickandmortyapi.com/](https://rickandmortyapi.com/)
 - **Clean Architecture**: Inspired by Uncle Bob's principles
 - **iOS Community**: For best practices and patterns
-
----
-
-**Built with ❤️ using Clean Architecture and modern iOS development practices**
