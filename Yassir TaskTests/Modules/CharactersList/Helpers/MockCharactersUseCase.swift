@@ -26,6 +26,9 @@ final class MockCharactersUseCase: CharactersUseCaseProtocol {
         lastFetchCharactersPage = page
         lastFetchCharactersStatus = status
         
+        // Add a small delay to simulate real async behavior
+        try await Task.sleep(nanoseconds: 10_000_000) // 0.01 seconds
+        
         switch fetchCharactersResult {
         case .success(let response):
             return response

@@ -195,6 +195,7 @@
 					};
 					05400B142E5F22960021CD05 = {
 						CreatedOnToolsVersion = 16.2;
+						LastSwiftMigration = 1620;
 						TestTargetID = 05400AF12E5F22950021CD05;
 					};
 				};
@@ -498,6 +499,7 @@
 		05400B272E5F22960021CD05 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = F8QPFBNADD;
@@ -506,6 +508,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "KhaledElshamy.Yassir-TaskUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = "Yassir Task";
@@ -515,6 +518,7 @@
 		05400B282E5F22960021CD05 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = F8QPFBNADD;

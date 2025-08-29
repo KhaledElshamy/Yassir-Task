@@ -9,6 +9,10 @@ import UIKit
 import SwiftUI
 import Combine
 
+import UIKit
+import SwiftUI
+import Combine
+
 // MARK: - CharactersListViewController
 
 final class CharactersListViewController: UITableViewController {

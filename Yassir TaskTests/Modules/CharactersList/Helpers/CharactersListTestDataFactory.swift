@@ -19,7 +19,8 @@ struct CharactersListTestDataFactory {
         status: String = "Alive",
         species: String = "Human",
         gender: String = "Male",
-        image: String = "https://example.com/image.jpg"
+        image: String = "https://example.com/image.jpg",
+        location: CharactersListResponseDTO.Location = CharactersListResponseDTO.Location(name: "Earth")
     ) -> CharactersListResponseDTO.Character {
         return CharactersListResponseDTO.Character(
             id: id,
@@ -27,7 +28,8 @@ struct CharactersListTestDataFactory {
             status: status,
             species: species,
             gender: gender,
-            image: image
+            image: image,
+            location: location
         )
     }
     
@@ -67,7 +69,8 @@ struct CharactersListTestDataFactory {
         status: CharacterResponse.Status = .alive,
         species: String = "Human",
         gender: String = "Male",
-        imageUrl: URL = URL(string: "https://example.com/image.jpg")!
+        imageUrl: URL = URL(string: "https://example.com/image.jpg")!,
+        location: String = "Earth"
     ) -> CharacterResponse {
         return CharacterResponse(
             id: id,
@@ -75,7 +78,8 @@ struct CharactersListTestDataFactory {
             imageUrl: imageUrl,
             species: species,
             status: status,
-            gender: gender
+            gender: gender,
+            location: location
         )
     }
     

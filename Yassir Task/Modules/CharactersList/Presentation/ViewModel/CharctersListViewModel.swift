@@ -8,6 +8,20 @@
 import Foundation
 import Combine
 
+// MARK: - Filter Option
+
+struct FilterOption {
+    let title: String
+    let status: CharacterResponse.Status?
+    
+    static let all = FilterOption(title: "All", status: nil)
+    static let alive = FilterOption(title: "Alive", status: .alive)
+    static let dead = FilterOption(title: "Dead", status: .dead)
+    static let unknown = FilterOption(title: "Unknown", status: .unknown)
+    
+    static let allOptions: [FilterOption] = [.all, .alive, .dead, .unknown]
+}
+
 // MARK: - View Model Actions
 
 struct CharacterListViewModelActions {
@@ -23,6 +37,7 @@ protocol CharactersViewModelInput {
     func refreshData()
     func retry()
     func filterByStatus(_ status: CharacterResponse.Status?)
+//    func selectFilter(at index: Int)
     func selectCharacter(_ character: CharacterResponse)
 }
 
@@ -35,6 +50,8 @@ protocol CharactersViewModelOutput {
     var canLoadMore: Bool { get }
     var currentPage: Int { get }
     var selectedStatus: CharacterResponse.Status? { get }
+    var filterOptions: [FilterOption] { get }
+    var selectedFilterIndex: Int { get }
     var emptyDataTitle: String { get }
     var errorTitle: String { get }
     var refreshTitle: String { get }
@@ -66,7 +83,8 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     private var allCharacters: [CharacterResponse] = []
     private var filteredCharacters: [CharacterResponse] = []
     private var currentStatusFilter: CharacterResponse.Status?
-    private var isLoading = false
+    private var currentFilterIndex = 0
+    private var _isLoading = false
     private var hasMoreData = true
     private var lastError: String?
     
@@ -83,7 +101,7 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     }
     
     var hasMorePages: Bool {
-        return hasMoreData && !isLoading
+        return hasMoreData && !_isLoading
     }
     
     var canLoadMore: Bool {
@@ -96,6 +114,14 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     
     var selectedStatus: CharacterResponse.Status? {
         return currentStatusFilter
+    }
+    
+    var filterOptions: [FilterOption] {
+        return FilterOption.allOptions
+    }
+    
+    var selectedFilterIndex: Int {
+        return currentFilterIndex
     }
     
     var emptyDataTitle: String {
@@ -117,6 +143,10 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
         return "Load More Characters"
     }
     
+    var isLoading: Bool {
+        return _isLoading
+    }
+    
     // MARK: - Initialization
     
     init(
@@ -130,7 +160,7 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     // MARK: - CharactersViewModelInput
     
     func loadCharacters() {
-        guard !isLoading else { return }
+        guard !_isLoading else { return }
         
         resetPagination()
         loadCharactersPage(page: currentPageNumber, status: currentStatusFilter?.rawValue)
@@ -144,7 +174,7 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     }
     
     func refreshData() {
-        guard !isLoading else { return }
+        guard !_isLoading else { return }
         
         resetPagination()
         loadCharactersPage(page: currentPageNumber, status: currentStatusFilter?.rawValue, isRefresh: true)
@@ -159,10 +189,17 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
         currentStatusFilter = status
         applyFilter()
         
-        // Always reload data when filter changes (including "All" which is nil)
         resetPagination()
         loadCharactersPage(page: currentPageNumber, status: status?.rawValue)
     }
+    
+//    func selectFilter(at index: Int) {
+//        guard index >= 0 && index < FilterOption.allOptions.count else { return }
+//        
+//        currentFilterIndex = index
+//        let selectedOption = FilterOption.allOptions[index]
+//        filterByStatus(selectedOption.status)
+//    }
     
     func selectCharacter(_ character: CharacterResponse) {
         actions.showCharacterDetails(character)
@@ -171,9 +208,9 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     // MARK: - Private Methods
     
     private func loadCharactersPage(page: Int, status: String?, isRefresh: Bool = false) {
-        guard !isLoading else { return }
+        guard !_isLoading else { return }
         
-        isLoading = true
+        _isLoading = true
         loading = isRefresh ? .refreshing : (page == 1 ? .fullScreen : .nextPage)
         clearError()
         
@@ -194,7 +231,7 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     
     @MainActor
     private func handleSuccessfulResponse(_ response: CharactersListResponse, isRefresh: Bool) {
-        isLoading = false
+        _isLoading = false
         loading = nil
         
         if isRefresh || currentPageNumber == 1 {
@@ -209,7 +246,7 @@ final class CharactersListViewModel: CharactersViewModelProtocol {
     
     @MainActor
     private func handleError(_ error: Error) {
-        isLoading = false
+        _isLoading = false
         loading = nil
         
         let errorMessage = error.localizedDescription
