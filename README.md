@@ -235,7 +235,6 @@ Yassir Task/
 1. **Clone the repository**
    ```bash
    git clone https://github.com/KhaledElshamy/Yassir-Task.git
-   cd rick-and-morty-app
    ```
 
 2. **Open the project**
