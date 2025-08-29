@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 protocol CharacterListFlowCoordinatorDependencies  {
     func makeCharactersListViewController(
@@ -40,8 +41,10 @@ final class CharacterListFlowCoordinator {
     }
     
     private func showCharacterDetails(_ character: CharacterResponse) {
-        // TODO: Implement character details navigation
-        print("Show character details for: \(character.name)")
+        let characterDetailsView = CharacterDetailsView(character: character)
+        let hostingController = UIHostingController(rootView: characterDetailsView)
+        hostingController.title = character.name
+        navigationController?.pushViewController(hostingController, animated: true)
     }
     
     private func showError(_ error: String) {

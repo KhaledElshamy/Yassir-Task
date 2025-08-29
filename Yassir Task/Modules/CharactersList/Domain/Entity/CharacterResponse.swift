@@ -20,4 +20,5 @@ struct CharacterResponse: Hashable {
   let species: String
   let status: Status
   let gender: String
+  let location: String
 }

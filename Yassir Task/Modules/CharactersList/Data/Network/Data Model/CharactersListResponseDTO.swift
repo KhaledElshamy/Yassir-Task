@@ -21,6 +21,11 @@ extension CharactersListResponseDTO {
         let species: String
         let gender: String
         let image: String
+        let location: Location
+    }
+    
+    struct Location: Codable {
+        let name: String
     }
 }
 

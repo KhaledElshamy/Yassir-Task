@@ -42,14 +42,15 @@ extension CharactersListResponseDTO.Character {
             imageURL = URL(string: "https://via.placeholder.com/150")!
         }
         
-        return CharacterResponse(
-            id: id,
-            name: name,
-            imageUrl: imageURL,
-            species: species,
-            status: mapStatus(status),
-            gender: gender
-        )
+                        return CharacterResponse(
+                    id: id,
+                    name: name,
+                    imageUrl: imageURL,
+                    species: species,
+                    status: mapStatus(status),
+                    gender: gender,
+                    location: location.name
+                )
     }
     
     /// Maps string status to enum status

@@ -18,5 +18,9 @@ import XCTest
 // - MockCharactersRepository.swift  
 // - CharactersListTestDataFactory.swift
 // - CharactersListTestAssertions.swift
+// - MockCharactersUseCase.swift
+// - MockCharacterListViewModelActions.swift
+// - MockCharactersListViewController.swift
+// - CharactersListViewModelTestDataFactory.swift
 //
 // Import these files as needed in your test classes.
