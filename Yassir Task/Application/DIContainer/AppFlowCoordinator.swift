@@ -70,9 +70,16 @@ final class AppFlowCoordinator: CharacterListFlowCoordinatorDependencies {
     
     // MARK: - CharacterListFlowCoordinatorDependencies
     
-    func makeCharactersListViewController(actions: CharacterListViewModelActions) -> CharacterListViewController {
-        let viewController = CharacterListViewController()
-        let viewModel = CharctersListViewModel()
+    func makeCharactersListViewController(actions: CharacterListViewModelActions) -> CharactersListViewController {
+        let viewController = CharactersListViewController()
+        
+        // Create dependency chain
+        let charactersRepository = CharactersRepository(service: dependencies.apiDataTransferService)
+        let charactersUseCase = CharactersUseCase(charactersRepository: charactersRepository)
+        let viewModel = CharactersListViewModel(
+            charactersUseCase: charactersUseCase,
+            actions: actions
+        )
         
         // Configure the view controller with the view model and actions
         viewController.configure(with: viewModel, actions: actions)

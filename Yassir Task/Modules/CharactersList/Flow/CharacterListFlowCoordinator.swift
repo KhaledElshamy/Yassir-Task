@@ -11,13 +11,13 @@ import UIKit
 protocol CharacterListFlowCoordinatorDependencies  {
     func makeCharactersListViewController(
         actions: CharacterListViewModelActions
-    ) -> CharacterListViewController
+    ) -> CharactersListViewController
 }
 
 final class CharacterListFlowCoordinator {
     private weak var navigationController: UINavigationController?
     private let dependencies: CharacterListFlowCoordinatorDependencies
-    private weak var moviesListVC: CharacterListViewController?
+    private weak var moviesListVC: CharactersListViewController?
     
     init(navigationController: UINavigationController? = nil,
          dependencies: CharacterListFlowCoordinatorDependencies) {
@@ -26,9 +26,26 @@ final class CharacterListFlowCoordinator {
     }
     
     func start() {
-        let actions = CharacterListViewModelActions()
+        let actions = CharacterListViewModelActions(
+            showCharacterDetails: { [weak self] character in
+                self?.showCharacterDetails(character)
+            },
+            showError: { [weak self] error in
+                self?.showError(error)
+            }
+        )
         let vc = dependencies.makeCharactersListViewController(actions: actions)
         navigationController?.pushViewController(vc, animated: false)
         moviesListVC = vc
+    }
+    
+    private func showCharacterDetails(_ character: CharacterResponse) {
+        // TODO: Implement character details navigation
+        print("Show character details for: \(character.name)")
+    }
+    
+    private func showError(_ error: String) {
+        // TODO: Implement error presentation
+        print("Show error: \(error)")
     }
 }
