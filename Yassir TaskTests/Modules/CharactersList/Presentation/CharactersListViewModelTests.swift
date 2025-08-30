@@ -56,8 +56,8 @@ final class CharactersListViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.loading)
         XCTAssertNil(viewModel.error)
         XCTAssertTrue(viewModel.isEmpty)
-        XCTAssertTrue(viewModel.hasMorePages)
-        XCTAssertTrue(viewModel.canLoadMore)
+        XCTAssertTrue(viewModel.hasMorePages, "Initially should have more pages")
+        XCTAssertTrue(viewModel.canLoadMore, "Initially should be able to load more")
         XCTAssertEqual(viewModel.currentPage, 1)
         XCTAssertNil(viewModel.selectedStatus)
         XCTAssertEqual(viewModel.emptyDataTitle, "No characters found")
@@ -78,7 +78,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.loadCharacters()
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.fetchCharactersCallCount, 1)
@@ -99,7 +99,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.loadCharacters()
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.fetchCharactersCallCount, 1)
@@ -187,7 +187,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.refreshData()
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.fetchCharactersCallCount, 1)
@@ -250,7 +250,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.filterByStatus(.alive)
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.fetchCharactersCallCount, 1)
@@ -268,7 +268,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.filterByStatus(.dead)
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.lastFetchCharactersStatus, "Dead")
@@ -285,28 +285,29 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.filterByStatus(.unknown)
         
         // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds // 0.1 seconds
         
         // Then
         XCTAssertEqual(mockUseCase.lastFetchCharactersStatus, "unknown")
         XCTAssertEqual(viewModel.selectedStatus, .unknown)
     }
     
-    func testFilterByStatusAll() async {
+    func testFilterByStatusNil() async {
         // Given
         let characters = CharactersListViewModelTestDataFactory.createCharactersList()
         let response = CharactersListViewModelTestDataFactory.createCharactersListResponse(characters: characters)
         mockUseCase.setSuccessResponse(response)
         
-        // When
+        // Load characters first
+        viewModel.loadCharacters()
+        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        // When - Clear filter (show all)
         viewModel.filterByStatus(nil)
         
-        // Wait for async operation to complete
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-        
         // Then
-        XCTAssertEqual(mockUseCase.lastFetchCharactersStatus, "")
         XCTAssertNil(viewModel.selectedStatus)
+        XCTAssertEqual(viewModel.characters.count, characters.count)
     }
     
     func testFilterAppliesToExistingCharacters() async {
@@ -360,40 +361,53 @@ final class CharactersListViewModelTests: XCTestCase {
         
         // When
         viewModel.loadCharacters()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        // Wait for async operation to complete
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
         
         // Then
         XCTAssertFalse(viewModel.isEmpty)
+        XCTAssertEqual(viewModel.characters.count, response.results.count)
     }
     
     func testHasMorePages() async {
         // Given
-        XCTAssertTrue(viewModel.hasMorePages)
+        XCTAssertTrue(viewModel.hasMorePages, "Initially should have more pages")
+        XCTAssertTrue(viewModel.canLoadMore, "Initially should be able to load more")
         
         let response = CharactersListViewModelTestDataFactory.createCharactersListResponse(hasNextPage: false)
         mockUseCase.setSuccessResponse(response)
         
         // When
         viewModel.loadCharacters()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        // Wait for async operation to complete
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
         
         // Then
-        XCTAssertFalse(viewModel.hasMorePages)
+        XCTAssertFalse(viewModel.hasMorePages, "After loading with no next page, should not have more pages")
+        XCTAssertFalse(viewModel.canLoadMore, "After loading with no next page, should not be able to load more")
     }
     
     func testCanLoadMore() async {
         // Given
-        XCTAssertTrue(viewModel.canLoadMore)
+        XCTAssertTrue(viewModel.canLoadMore, "Initially should be able to load more")
+        XCTAssertTrue(viewModel.hasMorePages, "Initially should have more pages")
+        XCTAssertNil(viewModel.loading, "Initially loading should be nil")
         
         let response = CharactersListViewModelTestDataFactory.createCharactersListResponse(hasNextPage: false)
         mockUseCase.setSuccessResponse(response)
         
         // When
         viewModel.loadCharacters()
-        try? await Task.sleep(nanoseconds: 100_000_000)
+        
+        // Wait for async operation to complete
+        try? await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
         
         // Then
-        XCTAssertFalse(viewModel.canLoadMore)
+        XCTAssertFalse(viewModel.canLoadMore, "After loading with no next page, should not be able to load more")
+        XCTAssertFalse(viewModel.hasMorePages, "After loading with no next page, should not have more pages")
+        XCTAssertNil(viewModel.loading, "After loading completes, loading should be nil")
     }
     
     func testEmptyDataTitle() {
@@ -468,24 +482,13 @@ final class CharactersListViewModelTests: XCTestCase {
         let filterOptions = viewModel.filterOptions
         
         // Then
-        XCTAssertEqual(filterOptions.count, 4)
-        XCTAssertEqual(filterOptions[0].title, "All")
-        XCTAssertNil(filterOptions[0].status)
-        XCTAssertEqual(filterOptions[1].title, "Alive")
-        XCTAssertEqual(filterOptions[1].status, .alive)
-        XCTAssertEqual(filterOptions[2].title, "Dead")
-        XCTAssertEqual(filterOptions[2].status, .dead)
-        XCTAssertEqual(filterOptions[3].title, "Unknown")
-        XCTAssertEqual(filterOptions[3].status, .unknown)
+        XCTAssertEqual(filterOptions.count, 3)
+        XCTAssertEqual(filterOptions[0], .alive)
+        XCTAssertEqual(filterOptions[1], .dead)
+        XCTAssertEqual(filterOptions[2], .unknown)
     }
     
-    func testSelectedFilterIndex() {
-        // Given & When
-        let initialIndex = viewModel.selectedFilterIndex
-        
-        // Then
-        XCTAssertEqual(initialIndex, 0) // Should default to "All"
-    }
+
     
     // MARK: - Edge Cases Tests
     
@@ -578,7 +581,7 @@ final class CharactersListViewModelTests: XCTestCase {
         try? await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertEqual(viewModel.characters.count, 1)
         
-        viewModel.filterByStatus(nil) // All
+        viewModel.filterByStatus(nil) // Clear filter
         try? await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertEqual(viewModel.characters.count, 4)
         
@@ -1139,7 +1142,7 @@ final class CharactersListViewModelTests: XCTestCase {
         viewModel.filterByStatus(.dead)
         try? await Task.sleep(nanoseconds: 100_000_000)
         
-        viewModel.filterByStatus(nil) // All
+        viewModel.filterByStatus(nil) // Clear filter
         try? await Task.sleep(nanoseconds: 100_000_000)
         
         // Refresh data

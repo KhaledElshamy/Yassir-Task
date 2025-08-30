@@ -8,7 +8,7 @@
 import Foundation
 
 struct CharacterResponse: Hashable {
-  enum Status: Hashable {
+  enum Status: Hashable, CaseIterable {
     case alive
     case dead
     case unknown

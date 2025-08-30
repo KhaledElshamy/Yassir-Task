@@ -25,17 +25,10 @@ final class CharactersListViewController: UITableViewController {
     private var actions: CharacterListViewModelActions?
     private var cancellables = Set<AnyCancellable>()
     private let imageCache = ImageCache.shared
+    private var isFiltering = false
+    private var filterHostingController: UIHostingController<CharacterFilterView>?
     
-    private let filterSegmentedControl: UISegmentedControl = {
-        let items = ["All", "Alive", "Dead", "Unknown"]
-        let segmentedControl = UISegmentedControl(items: items)
-        segmentedControl.selectedSegmentIndex = 0
-        segmentedControl.backgroundColor = .systemBackground
-        segmentedControl.selectedSegmentTintColor = .darkGray
-        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.darkGray], for: .normal)
-        return segmentedControl
-    }()
+
     
     // MARK: - Lifecycle
     
@@ -47,6 +40,7 @@ final class CharactersListViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        setupNavigationBar()
         loadInitialData()
     }
     
@@ -59,13 +53,18 @@ final class CharactersListViewController: UITableViewController {
     func configure(with viewModel: CharactersListViewModel, actions: CharacterListViewModelActions) {
         self.viewModel = viewModel
         self.actions = actions
+        
+        // Recreate filter view with the new viewModel
+        if isViewLoaded {
+            setupFilterView()
+        }
     }
     
     // MARK: - UI Setup
     
     private func setupUI() {
         setupNavigationBar()
-        setupFilterButtons()
+        setupFilterView()
         setupTableView()
         setupRefreshControl()
         configureDataSource()
@@ -77,25 +76,30 @@ final class CharactersListViewController: UITableViewController {
         navigationController?.navigationBar.largeTitleTextAttributes = [
             .foregroundColor: UIColor.darkGray
         ]
+        
+        // Ensure the navigation bar is visible and properly configured
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationItem.largeTitleDisplayMode = .always
     }
     
-    private func setupFilterButtons() {
-        setupFilterSegmentedControl()
+    private func setupFilterView() {
+        guard let viewModel = viewModel else { return }
+        
+        let characterFilterView = CharacterFilterView(
+            onStatusChanged: { [weak self] status in
+                self?.isFiltering = true
+                viewModel.filterByStatus(status)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self?.isFiltering = false
+                }
+            }
+        )
+        
+        filterHostingController = UIHostingController(rootView: characterFilterView)
+        filterHostingController?.view.backgroundColor = .clear
     }
     
-    private func setupFilterSegmentedControl() {
-        filterSegmentedControl.addTarget(self, action: #selector(filterSegmentedControlChanged), for: .valueChanged)
-        filterSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
-        
-        view.addSubview(filterSegmentedControl)
-        
-        NSLayoutConstraint.activate([
-            filterSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            filterSegmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            filterSegmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            filterSegmentedControl.heightAnchor.constraint(equalToConstant: 40)
-        ])
-    }
+
     
     private func setupTableView() {
         tableView.backgroundColor = .systemBackground
@@ -104,13 +108,7 @@ final class CharactersListViewController: UITableViewController {
         tableView.estimatedRowHeight = 100
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
-        // Set content inset to account for the segmented control
-        let segmentedControlHeight: CGFloat = 40
-        let spacing: CGFloat = 20
-        let topInset = segmentedControlHeight + spacing + 20 // 20 for safe area
-        
-        tableView.contentInset = UIEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
-        tableView.scrollIndicatorInsets = tableView.contentInset
+        // No need for content inset since we're using tableHeaderView
     }
     
     private func setupRefreshControl() {
@@ -123,7 +121,7 @@ final class CharactersListViewController: UITableViewController {
     private func configureDataSource() {
         dataSource = UITableViewDiffableDataSource(tableView: tableView) { [weak self] tableView, indexPath, character in
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-            
+            cell.selectionStyle = .none
             // Configure cell with SwiftUI content
             cell.contentConfiguration = UIHostingConfiguration {
                 CharacterRow(
@@ -155,8 +153,6 @@ final class CharactersListViewController: UITableViewController {
                     }
                 }
             }
-            
-            cell.selectionStyle = .default
             return cell
         }
     }
@@ -170,7 +166,7 @@ final class CharactersListViewController: UITableViewController {
         viewModel.$characters
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.applySnapshot()
+                self?.applySnapshot(!(self?.isFiltering ?? false))
             }
             .store(in: &cancellables)
         
@@ -197,22 +193,7 @@ final class CharactersListViewController: UITableViewController {
         viewModel?.refreshData()
     }
     
-    @objc private func filterSegmentedControlChanged() {
-        let selectedStatus: CharacterResponse.Status?
-        
-        switch filterSegmentedControl.selectedSegmentIndex {
-        case 1:
-            selectedStatus = .alive
-        case 2:
-            selectedStatus = .dead
-        case 3:
-            selectedStatus = .unknown
-        default:
-            selectedStatus = nil
-        }
-        
-        viewModel?.filterByStatus(selectedStatus)
-    }
+
     
     // MARK: - Data Loading
     
@@ -316,6 +297,15 @@ extension CharactersListViewController {
         viewModel?.selectCharacter(character)
     }
     
+    
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return filterHostingController?.view
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 60
+    }
+    
     // MARK: - Pagination trigger
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard let viewModel = viewModel else { return }
@@ -328,3 +318,4 @@ extension CharactersListViewController {
         }
     }
 }
+

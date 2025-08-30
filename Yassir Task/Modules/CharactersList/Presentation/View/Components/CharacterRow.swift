@@ -31,7 +31,7 @@ struct CharacterRow: View {
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(.white)
+                .fill(cellBackgroundColor)
                 .stroke(.gray.opacity(0.3), lineWidth: 1)
         )
         .padding(.horizontal, 16)
@@ -103,6 +103,17 @@ struct CharacterRow: View {
             return .gray
         }
     }
+    
+    private var cellBackgroundColor: Color {
+        switch status {
+        case .alive:
+            return Color.green.opacity(0.1)
+        case .dead:
+            return Color.red.opacity(0.1)
+        case .unknown:
+            return Color.gray.opacity(0.1)
+        }
+    }
 }
 
 // MARK: - Preview
@@ -110,13 +121,6 @@ struct CharacterRow: View {
 struct CharacterRow_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 8) {
-            CharacterRow(
-                name: "Zephyr",
-                species: "Elf",
-                status: .alive,
-                image: nil
-            )
-            
             CharacterRow(
                 name: "Rick Sanchez",
                 species: "Human",
@@ -127,7 +131,14 @@ struct CharacterRow_Previews: PreviewProvider {
             CharacterRow(
                 name: "Morty Smith",
                 species: "Human",
-                status: .alive,
+                status: .dead,
+                image: nil
+            )
+            
+            CharacterRow(
+                name: "Summer Smith",
+                species: "Human",
+                status: .unknown,
                 image: nil
             )
         }
