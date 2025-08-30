@@ -255,6 +255,10 @@ Yassir Task/
 <!-- TODO: Add demo video here -->
 *Demo video will be added here showcasing the app's features and functionality.*
 
+
+https://github.com/user-attachments/assets/2776c3e1-39e1-4747-b59e-9cc7b940e89d
+
+
 ## 🔧 Key Technologies
 
 ### Core Technologies
