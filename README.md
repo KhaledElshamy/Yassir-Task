@@ -234,8 +234,7 @@ Yassir Task/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/rick-and-morty-app.git
-   cd rick-and-morty-app
+   git clone https://github.com/KhaledElshamy/Yassir-Task.git
    ```
 
 2. **Open the project**
@@ -338,7 +337,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Rick and Morty API**: [https://rickandmortyapi.com/](https://rickandmortyapi.com/)
 - **Clean Architecture**: Inspired by Uncle Bob's principles
 - **iOS Community**: For best practices and patterns
-
----
-
-**Built with ❤️ using Clean Architecture and modern iOS development practices**
